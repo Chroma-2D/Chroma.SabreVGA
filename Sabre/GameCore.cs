@@ -18,8 +18,6 @@ namespace Sabre
         private VgaScreen _vga;
 
         private Log Log { get; } = LogManager.GetForCurrentAssembly();
-        private int _direction = 1;
-        private bool _initComplete;
 
         private Color[] _colors = new[]
         {
@@ -36,32 +34,53 @@ namespace Sabre
 
         internal GameCore()
         {
-            Window.GoWindowed(new Size(1024, 640), true);
-            FixedUpdateFrequency = 90;
+            Window.GoWindowed(new Size(640, 480), true);
         }
 
         protected override void LoadContent()
         {
-            _ttf = Content.Load<TrueTypeFont>("Nouveau_IBM.ttf", 16);
+            _ttf = Content.Load<TrueTypeFont>("c64style.ttf", 16);
             _ttf.HintingMode = HintingMode.Normal;
-            _vga = new VgaScreen(Window, _ttf, 9, 16);
+            _vga = new VgaScreen(Window, _ttf, 16, 16);
 
             _vga.Cursor.Offset = new Vector2(0, -1);
             _vga.Cursor.Padding = new Size(0, 1);
             _vga.Cursor.Shape = CursorShape.Block;
 
-            _initComplete = true;
+            for (var y = 0; y < _vga.TotalRows; y++)
+            {
+                for (var x = 0; x < _vga.TotalColumns; x++)
+                {
+                    if (x == 0 && y == 0)
+                    {
+                        _vga.PutCharAt('+', x, y);
+                    }
+                    else if (x == _vga.TotalColumns - 1 && y == 0)
+                    {
+                        _vga.PutCharAt('+', x, y);
+                    }
+                    else if (x == 0 && y == _vga.TotalRows - 1)
+                    {
+                        _vga.PutCharAt('+', x, y);
+                    }
+                    else if (x == _vga.TotalColumns - 1 && y == _vga.TotalRows - 1)
+                    {
+                        _vga.PutCharAt('+', x, y);
+                    }
+                    else if (x == 0 || x == _vga.TotalColumns - 1)
+                    {
+                        _vga.PutCharAt('|', x, y);
+                    }
+                    else if (y == 0 || y == _vga.TotalRows - 1)
+                    {
+                        _vga.PutCharAt('-', x, y);
+                    }
+                }
+            }
         }
 
         protected override void TextInput(TextInputEventArgs e)
         {
-            var fgColor = _colors[_rnd.Next() % _colors.Length];
-            _vga.PutCharAt(e.Text[0], fgColor, _vga.Cursor.X, _vga.Cursor.Y);
-
-            if (_vga.Cursor.X >= _vga.WindowColumns || _vga.Cursor.X == _vga.Margins.Left)
-                _direction = -_direction;
-
-            _vga.Cursor.X += _direction;
         }
 
         protected override void KeyPressed(KeyEventArgs e)
@@ -93,12 +112,32 @@ namespace Sabre
         {
             Window.Title = $"{Window.FPS}";
 
+            var fgColor = _colors[_rnd.Next() % _colors.Length];
+            // var bgColor = _colors[_rnd.Next() % _colors.Length];
+
+            var c = '/';
+
+            if (_rnd.Next() % 4 == 0)
+                c = '\\';
+            
+            _vga.PutCharAt(c, _vga.Cursor.X, _vga.Cursor.Y, fgColor, Color.Black, _rnd.Next() % 5 == 0);
+
+            if (_vga.Cursor.X++ >= _vga.WindowColumns)
+            {
+                _vga.Cursor.X = 0;
+                
+                if (_vga.Cursor.Y + 1 > _vga.WindowRows)
+                    _vga.Cursor.Y = _vga.Margins.Top;
+                else
+                    _vga.Cursor.Y++;
+            }
+            
+            // _vga.ScrollUp();
             _vga.Update(delta);
         }
 
         protected override void FixedUpdate(float fixedDelta)
         {
-            _vga.ScrollUp();
         }
 
         protected override void Draw(RenderContext context)

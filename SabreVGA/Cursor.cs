@@ -66,7 +66,6 @@ namespace SabreVGA
         {
             if (_visible)
             {
-                context.SetShapeBlendingPreset(BlendingPreset.Subtract);
                 switch (Shape)
                 {
                     case CursorShape.Block:
@@ -114,8 +113,6 @@ namespace SabreVGA
                         );
                         break;
                 }
-
-                context.ResetShapeBlending();
             }
         }
 
