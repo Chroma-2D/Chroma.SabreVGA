@@ -34,7 +34,7 @@ namespace Sabre
 
         internal GameCore()
         {
-            Window.GoWindowed(new Size(640, 480), true);
+            Window.GoWindowed(new Size(1640, 800), true);
         }
 
         protected override void LoadContent()
@@ -113,26 +113,28 @@ namespace Sabre
             Window.Title = $"{Window.FPS}";
 
             var fgColor = _colors[_rnd.Next() % _colors.Length];
-            // var bgColor = _colors[_rnd.Next() % _colors.Length];
+            var bgColor = _colors[_rnd.Next() % _colors.Length];
 
             var c = '/';
 
             if (_rnd.Next() % 4 == 0)
                 c = '\\';
             
-            _vga.PutCharAt(c, _vga.Cursor.X, _vga.Cursor.Y, fgColor, Color.Black, _rnd.Next() % 5 == 0);
+            _vga.PutCharAt(c, _vga.Cursor.X, _vga.Cursor.Y, fgColor, Color.Green, _rnd.Next() % 5 == 0);
 
             if (_vga.Cursor.X++ >= _vga.WindowColumns)
             {
                 _vga.Cursor.X = 0;
-                
+
                 if (_vga.Cursor.Y + 1 > _vga.WindowRows)
-                    _vga.Cursor.Y = _vga.Margins.Top;
+                {
+                    _vga.ScrollUp();
+                }
+
                 else
                     _vga.Cursor.Y++;
             }
             
-            // _vga.ScrollUp();
             _vga.Update(delta);
         }
 

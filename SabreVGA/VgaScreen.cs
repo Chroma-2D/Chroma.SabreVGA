@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading;
+using Chroma.ContentManagement;
 using Chroma.Diagnostics.Logging;
 using Chroma.Graphics;
+using Chroma.Graphics.Accelerated;
 using Chroma.Graphics.TextRendering;
 using Chroma.Windowing;
 
@@ -14,6 +16,7 @@ namespace SabreVGA
     {
         private Log Log { get; } = LogManager.GetForCurrentAssembly();
         private Window Window { get; }
+        private PixelShader BackgroundRenderShader { get; }
 
         private bool Running { get; set; } = true;
 
@@ -78,7 +81,6 @@ namespace SabreVGA
             });
 
             Window.QuitRequested += (sender, args) => { Running = false; };
-
             RecalculateDimensions();
             BackgroundRenderThread.Start();
         }
@@ -105,7 +107,7 @@ namespace SabreVGA
             if (y < 0 || y >= TotalRows || x < 0 || x >= TotalColumns)
             {
                 Log.Error(
-                    $"Tried to set color FG:'{foreground.PackedValue:X6}' at ({x},{y}) which are out of bounds.");
+                    $"Tried to set color FG:'{foreground.Packed.RGBA:X6}' at ({x},{y}) which are out of bounds.");
 
                 return;
             }
@@ -230,18 +232,11 @@ namespace SabreVGA
                 {
                     var cell = Buffer[y * TotalColumns + x];
 
-                    var actualColor = new Color(
-                        cell.Background.A,
-                        cell.Background.R,
-                        cell.Background.G,
-                        cell.Background.B
-                    );
-
                     for (var ty = y * CellHeight; ty < y * CellHeight + CellHeight; ty++)
                     {
                         for (var tx = x * CellWidth; tx < x * CellWidth + CellWidth; tx++)
                         {
-                            BackgroundRender.SetPixel(tx, ty, actualColor);
+                            BackgroundRender.SetPixel(tx, ty, cell.Background);
                         }
                     }
                 }
