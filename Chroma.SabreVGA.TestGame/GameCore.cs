@@ -10,7 +10,7 @@ using Chroma.Input.EventArgs;
 using SabreVGA;
 using Color = Chroma.Graphics.Color;
 
-namespace Sabre
+namespace Chroma.SabreVGA.TestGame
 {
     internal class GameCore : Game
     {

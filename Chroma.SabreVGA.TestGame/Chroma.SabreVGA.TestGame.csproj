@@ -10,10 +10,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SabreVGA\SabreVGA.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
       <Folder Include="Content" />
     </ItemGroup>
 
@@ -39,5 +35,9 @@
       <None Update="Content\c64style.ttf">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Chroma.SabreVGA\Chroma.SabreVGA.csproj" />
     </ItemGroup>
 </Project>

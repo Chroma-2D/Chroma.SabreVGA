@@ -32,10 +32,9 @@ namespace SabreVGA
         public Cursor Cursor { get; private set; }
 
         public VgaCell[] Buffer { get; private set; }
-        public int BlinkInterval { get; set; } = 500;
+        public int CellBlinkInterval { get; set; } = 500;
 
         public Vector2 Position { get; set; }
-
 
         public Size Size
         {
@@ -66,11 +65,6 @@ namespace SabreVGA
         public Color ActiveBackgroundColor { get; set; } = DefaultBackgroundColor;
 
         public Dictionary<char, Vector2> InCellCharacterOffsets { get; }
-
-        public VgaScreen(Window window, TrueTypeFont font)
-            : this(Vector2.Zero, window.Size, font, font.Measure("X").Width, font.Size)
-        {
-        }
 
         public VgaScreen(Vector2 position, Size size, TrueTypeFont font, int cellWidth, int cellHeight)
         {
@@ -171,7 +165,7 @@ namespace SabreVGA
         {
             BlinkTimer += (int)(1000 * delta);
 
-            if (BlinkTimer >= BlinkInterval)
+            if (BlinkTimer >= CellBlinkInterval)
             {
                 BlinkingVisible = !BlinkingVisible;
                 BlinkTimer = 0;

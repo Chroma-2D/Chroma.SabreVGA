@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sabre", "Sabre\Sabre.csproj", "{61D7D080-835A-43D9-850E-D48F10548BA1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chroma.SabreVGA.TestGame", "Chroma.SabreVGA.TestGame\Chroma.SabreVGA.TestGame.csproj", "{61D7D080-835A-43D9-850E-D48F10548BA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SabreVGA", "SabreVGA\SabreVGA.csproj", "{6C96C7CE-0E40-4D4B-AA34-4B94B537F747}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chroma.SabreVGA", "Chroma.SabreVGA\Chroma.SabreVGA.csproj", "{6C96C7CE-0E40-4D4B-AA34-4B94B537F747}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

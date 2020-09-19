@@ -1,4 +1,4 @@
-﻿namespace Sabre
+﻿namespace Chroma.SabreVGA.TestGame
 {
     internal class Program
     {

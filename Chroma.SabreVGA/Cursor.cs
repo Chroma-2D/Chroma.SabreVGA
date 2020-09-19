@@ -53,8 +53,14 @@ namespace SabreVGA
         public CursorShape Shape { get; set; } = CursorShape.Block;
         public Vector2 Offset { get; set; }
         public Size Padding { get; set; }
+        
+        public void ResetState()
+        {
+            _timer = 0;
+            _visible = true;
+        }
 
-        public Cursor(VgaScreen vgaScreen)
+        internal Cursor(VgaScreen vgaScreen)
         {
             _x = 0;
             _y = 0;
@@ -62,7 +68,7 @@ namespace SabreVGA
             VgaScreen = vgaScreen;
         }
 
-        public void Draw(RenderContext context)
+        internal void Draw(RenderContext context)
         {
             if (_visible)
             {
@@ -116,13 +122,7 @@ namespace SabreVGA
             }
         }
 
-        public void Reset()
-        {
-            _timer = 0;
-            _visible = true;
-        }
-
-        public void Update(float delta)
+        internal void Update(float delta)
         {
             if (ForceHidden)
             {
