@@ -10,7 +10,7 @@
         <e p="Cursor.cs" t="Include" />
         <e p="CursorShape.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive">
-          <e p="Debug" t="Include">
+          <e p="Release" t="Include">
             <e p="netcoreapp3.1" t="Include">
               <e p="Chroma.SabreVGA.AssemblyInfo.cs" t="Include" />
             </e>
@@ -35,7 +35,7 @@
         </e>
         <e p="GameCore.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive">
-          <e p="Debug" t="Include">
+          <e p="Release" t="Include">
             <e p="netcoreapp3.1" t="Include">
               <e p="Chroma.SabreVGA.TestGame.AssemblyInfo.cs" t="Include" />
             </e>

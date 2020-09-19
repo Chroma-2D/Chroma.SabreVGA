@@ -59,7 +59,7 @@ namespace SabreVGA
         public int CellWidth { get; private set; }
         public int CellHeight { get; private set; }
 
-        public VgaMargins Margins { get; private set; }
+        public VgaMargins Margins { get; set; }
 
         public Color ActiveForegroundColor { get; set; } = DefaultForegroundColor;
         public Color ActiveBackgroundColor { get; set; } = DefaultBackgroundColor;
