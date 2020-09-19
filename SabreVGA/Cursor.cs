@@ -74,7 +74,7 @@ namespace SabreVGA
                             new Vector2(
                                 X * VgaScreen.CellWidth,
                                 Y * VgaScreen.CellHeight
-                            ) + Offset,
+                            ) + Offset + VgaScreen.Position,
                             new Size(
                                 VgaScreen.CellWidth,
                                 VgaScreen.CellHeight
@@ -89,7 +89,7 @@ namespace SabreVGA
                             new Vector2(
                                 X * VgaScreen.CellWidth,
                                 Y * VgaScreen.CellHeight
-                            ) + Offset,
+                            ) + Offset + VgaScreen.Position,
                             new Size(
                                 1,
                                 VgaScreen.CellHeight
@@ -104,7 +104,7 @@ namespace SabreVGA
                             new Vector2(
                                 X * VgaScreen.CellWidth,
                                 Y * VgaScreen.CellHeight + VgaScreen.CellHeight - 2
-                            ) + Offset,
+                            ) + Offset + VgaScreen.Position,
                             new Size(
                                 VgaScreen.CellWidth,
                                 2

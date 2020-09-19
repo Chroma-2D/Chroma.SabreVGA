@@ -1,40 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
-using System.Threading;
-using Chroma.ContentManagement;
 using Chroma.Diagnostics.Logging;
 using Chroma.Graphics;
-using Chroma.Graphics.Accelerated;
 using Chroma.Graphics.TextRendering;
+using Chroma.MemoryManagement;
 using Chroma.Windowing;
+using Color = Chroma.Graphics.Color;
 
 namespace SabreVGA
 {
-    public class VgaScreen
+    public class VgaScreen : DisposableResource
     {
-        private Log Log { get; } = LogManager.GetForCurrentAssembly();
-        private Window Window { get; }
-        private PixelShader BackgroundRenderShader { get; }
+        public static readonly Color DefaultForegroundColor = Color.Gray;
+        public static readonly Color DefaultBackgroundColor = Color.Transparent;
 
-        private bool Running { get; set; } = true;
+        private Size _size;
+
+        private Log Log { get; } = LogManager.GetForCurrentAssembly();
 
         private int BlinkTimer { get; set; }
         private bool BlinkingVisible { get; set; } = true;
-
-        private Texture BackgroundRender { get; }
-        private Thread BackgroundRenderThread { get; }
+        
+        private RenderTarget BackgroundRenderTarget { get; set; }
+        private RenderTarget ForegroundRenderTarget { get; set; }
 
         public TrueTypeFont Font { get; private set; }
-
-        public static readonly Color DefaultForegroundColor = Color.Gray;
-        public static readonly Color DefaultBackgroundColor = Color.Transparent;
 
         public Cursor Cursor { get; private set; }
 
         public VgaCell[] Buffer { get; private set; }
         public int BlinkInterval { get; set; } = 500;
+
+        public Vector2 Position { get; set; }
+
+
+        public Size Size
+        {
+            get => _size;
+            set
+            {
+                _size = value;
+                
+                BackgroundRenderTarget.Dispose();
+                ForegroundRenderTarget.Dispose();
+                
+                FinishInitialization();
+            }
+        }
 
         public int TotalColumns { get; private set; }
         public int TotalRows { get; private set; }
@@ -50,16 +65,18 @@ namespace SabreVGA
         public Color ActiveForegroundColor { get; set; } = DefaultForegroundColor;
         public Color ActiveBackgroundColor { get; set; } = DefaultBackgroundColor;
 
-        public Dictionary<char, Vector2> InCellCharacterOffsets { get; set; }
+        public Dictionary<char, Vector2> InCellCharacterOffsets { get; }
 
         public VgaScreen(Window window, TrueTypeFont font)
-            : this(window, font, font.Measure("X").Width, font.Size)
+            : this(Vector2.Zero, window.Size, font, font.Measure("X").Width, font.Size)
         {
         }
 
-        public VgaScreen(Window window, TrueTypeFont font, int cellWidth, int cellHeight)
+        public VgaScreen(Vector2 position, Size size, TrueTypeFont font, int cellWidth, int cellHeight)
         {
-            Window = window;
+            Position = position;
+            _size = size;
+
             Font = font;
 
             CellWidth = cellWidth;
@@ -69,20 +86,8 @@ namespace SabreVGA
             Margins = new VgaMargins(1, 1, 1, 1);
 
             InCellCharacterOffsets = new Dictionary<char, Vector2>();
-
-            BackgroundRender = new Texture(Window.Size.Width, Window.Size.Height);
-            BackgroundRenderThread = new Thread(() =>
-            {
-                while (Running)
-                {
-                    UpdateBackground();
-                    Thread.Sleep(TimeSpan.FromTicks(100));
-                }
-            });
-
-            Window.QuitRequested += (sender, args) => { Running = false; };
-            RecalculateDimensions();
-            BackgroundRenderThread.Start();
+            
+            FinishInitialization();
         }
 
         public void PutCharAt(char character, int x, int y) =>
@@ -178,11 +183,22 @@ namespace SabreVGA
 
         public void Draw(RenderContext context)
         {
-            BackgroundRender.Flush();
-            context.DrawTexture(BackgroundRender, Vector2.Zero, Vector2.One, Vector2.Zero, 0f);
-
+            context.RenderTo(BackgroundRenderTarget, () =>
+            {
+                context.Clear(Color.Transparent);
+                DrawBackgroundBuffer(context);
+            });
+            
+            context.RenderTo(ForegroundRenderTarget, () =>
+            {
+                context.Clear(Color.Transparent);
+                DrawDisplayBuffer(context);
+            });
+            
+            context.DrawTexture(BackgroundRenderTarget, Position, Vector2.One, Vector2.Zero, 0f);
             Cursor.Draw(context);
-            DrawDisplayBuffer(context);
+
+            context.DrawTexture(ForegroundRenderTarget, Position, Vector2.One, Vector2.Zero, 0f);            
         }
 
         public void RecalculateDimensions()
@@ -192,8 +208,8 @@ namespace SabreVGA
                 Cursor.X = Margins.Left;
                 Cursor.Y = Margins.Top;
 
-                TotalColumns = Window.Size.Width / CellWidth;
-                TotalRows = Window.Size.Height / CellHeight;
+                TotalColumns = Size.Width / CellWidth;
+                TotalRows = Size.Height / CellHeight;
 
                 var bufferSize = TotalColumns * TotalRows;
                 Buffer = new VgaCell[bufferSize];
@@ -218,29 +234,42 @@ namespace SabreVGA
             }
         }
 
+        protected override void FreeManagedResources()
+        {
+            BackgroundRenderTarget.Dispose();
+            ForegroundRenderTarget.Dispose();
+        }
+
+        private void FinishInitialization()
+        {
+            RecalculateDimensions();
+            
+            ForegroundRenderTarget = new RenderTarget(Size);
+            BackgroundRenderTarget = new RenderTarget(Size);
+        }
+
         private void FailsafeReset()
         {
             Margins = new VgaMargins(1, 1, 1, 1);
             RecalculateDimensions();
         }
 
-        private void UpdateBackground()
+        private void DrawBackgroundBuffer(RenderContext context)
         {
+            context.ShapeBlendingEnabled = false;
             for (var y = 0; y < TotalRows; y++)
             {
                 for (var x = 0; x < TotalColumns; x++)
                 {
-                    var cell = Buffer[y * TotalColumns + x];
-
-                    for (var ty = y * CellHeight; ty < y * CellHeight + CellHeight; ty++)
-                    {
-                        for (var tx = x * CellWidth; tx < x * CellWidth + CellWidth; tx++)
-                        {
-                            BackgroundRender.SetPixel(tx, ty, cell.Background);
-                        }
-                    }
+                    context.Rectangle(
+                        ShapeMode.Fill,
+                        new Vector2(x * CellWidth, y * CellHeight),
+                        CellWidth, CellHeight,
+                        Buffer[y * TotalColumns + x].Background
+                    );
                 }
             }
+            context.ShapeBlendingEnabled = true;
         }
 
         private void DrawDisplayBuffer(RenderContext context)
