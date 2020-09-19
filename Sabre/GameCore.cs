@@ -79,7 +79,7 @@ namespace Sabre
             else if (e.KeyCode == KeyCode.Home)
                 _vga2.Cursor.X = 0;
             else if (e.KeyCode == KeyCode.End)
-                _vga2.Cursor.X = _vga1.TotalColumns;
+                _vga2.Cursor.X = _vga2.TotalColumns;
             else if (e.KeyCode == KeyCode.F1)
                 _vga2.ClearScreen(false);
             else if (e.KeyCode == KeyCode.F2)
