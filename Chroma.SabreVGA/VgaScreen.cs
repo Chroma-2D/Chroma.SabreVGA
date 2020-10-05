@@ -228,6 +228,17 @@ namespace SabreVGA
             }
         }
 
+        public VgaCell GetCell(int x, int y)
+        {
+            if (y < 0 || y >= TotalRows || x < 0 || x >= TotalColumns)
+            {
+                Log.Error($"Trying to get out-of-bounds cell info.");
+                return new VgaCell('\0', Color.Black, Color.Black);
+            }
+
+            return Buffer[y * TotalColumns + x];
+        }
+
         protected override void FreeManagedResources()
         {
             BackgroundRenderTarget.Dispose();
