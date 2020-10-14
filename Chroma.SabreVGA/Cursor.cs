@@ -49,6 +49,7 @@ namespace SabreVGA
         public Color Color { get; set; } = Color.White;
         public bool ForceVisible { get; set; }
         public bool ForceHidden { get; set; }
+        public bool AllowMovementOutOfWindow { get; set; }
 
         public CursorShape Shape { get; set; } = CursorShape.Block;
         public Vector2 Offset { get; set; }
@@ -149,15 +150,28 @@ namespace SabreVGA
 
         private void EnsureInBounds()
         {
-            if (_x >= VgaScreen.TotalColumns - VgaScreen.Margins.Right - 1)
-                _x = VgaScreen.TotalColumns - VgaScreen.Margins.Right - 1;
-            else if (_x < VgaScreen.Margins.Left)
-                _x = VgaScreen.Margins.Left;
+            var leftMostBounds = 0;
+            var topMostBounds = 0;
+            var rightMostBounds = VgaScreen.TotalColumns - 1;
+            var bottomMostBounds = VgaScreen.TotalRows - 1;
+            
+            if (!AllowMovementOutOfWindow)
+            {
+                leftMostBounds = VgaScreen.Margins.Left;
+                rightMostBounds -= VgaScreen.Margins.Right;
+                topMostBounds = VgaScreen.Margins.Top;
+                bottomMostBounds -= VgaScreen.Margins.Bottom;
+            }
 
-            if (_y >= VgaScreen.TotalRows - VgaScreen.Margins.Bottom - 1)
-                _y = VgaScreen.TotalRows - VgaScreen.Margins.Bottom - 1;
-            else if (_y < VgaScreen.Margins.Top)
-                _y = VgaScreen.Margins.Top;
+            if (_x > rightMostBounds)
+                _x = rightMostBounds;
+            else if (_x < leftMostBounds)
+                _x = leftMostBounds;
+
+            if (_y > bottomMostBounds)
+                _y = bottomMostBounds;
+            else if (_y < topMostBounds)
+                _y = topMostBounds;
         }
     }
 }

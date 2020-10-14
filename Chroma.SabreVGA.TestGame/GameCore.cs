@@ -61,7 +61,8 @@ namespace Chroma.SabreVGA.TestGame
             ), Window.Size / 4, _ttf2, 9, 16);
             _vga2.Cursor.Offset = new Vector2(0, -1);
             _vga2.Cursor.Shape = CursorShape.Underscore;
-
+            _vga2.Cursor.AllowMovementOutOfWindow = true;
+            
             DrawFrame(_vga1);
             DrawFrame(_vga2);
         }
