@@ -8,7 +8,7 @@
 
     <PropertyGroup>
         <PackageId>Chroma.SabreVGA</PackageId>
-        <Version>1.2.0</Version>
+        <Version>1.3.0</Version>
         <Authors>Ciastex</Authors>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Description>VGA emulator for Chroma Framework to aid in creation of text-based games.</Description>
@@ -19,6 +19,6 @@
     </PropertyGroup>
     
     <ItemGroup>
-      <PackageReference Include="Chroma" Version="0.21.0" />
+      <PackageReference Include="Chroma" Version="0.21.2" />
     </ItemGroup>
 </Project>

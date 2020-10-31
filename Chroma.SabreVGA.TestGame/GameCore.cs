@@ -82,7 +82,7 @@ namespace Chroma.SabreVGA.TestGame
             else if (e.KeyCode == KeyCode.End)
                 _vga2.Cursor.X = _vga2.TotalColumns;
             else if (e.KeyCode == KeyCode.F1)
-                _vga2.ClearScreen(false);
+                _vga2.Clear();
             else if (e.KeyCode == KeyCode.F2)
                 _vga2.ScrollUp();
             else if (e.KeyCode == KeyCode.Return)

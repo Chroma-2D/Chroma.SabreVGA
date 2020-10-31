@@ -115,29 +115,36 @@ namespace SabreVGA
             Buffer[y * TotalColumns + x].Background = background;
         }
 
-        public void ClearScreen(bool preserveColors)
+        public void Clear()
         {
             for (var y = Margins.Top; y < TotalRows - Margins.Bottom; y++)
             {
-                if (preserveColors)
-                {
-                    for (var x = Margins.Left; x < TotalColumns - Margins.Right; x++)
-                        Buffer[y * TotalRows + x].Character = ' ';
-                }
-                else
-                {
-                    for (var x = Margins.Left; x < TotalColumns - Margins.Right; x++)
-                    {
-                        Buffer[y * TotalColumns + x].Character = ' ';
-                        Buffer[y * TotalColumns + x].Foreground = DefaultForegroundColor;
-                        Buffer[y * TotalColumns + x].Background = DefaultBackgroundColor;
-                    }
+                for (var x = Margins.Left; x < TotalColumns - Margins.Right; x++)
+                    Buffer[y * TotalRows + x].Character = ' ';
+            }
+        }
 
-                    ActiveForegroundColor = DefaultForegroundColor;
-                    ActiveBackgroundColor = DefaultBackgroundColor;
+        public void Clear(Color foreground, Color background, bool setActiveColors = false)
+        {
+            for (var y = Margins.Top; y < TotalRows - Margins.Bottom; y++)
+            {
+                for (var x = Margins.Left; x < TotalColumns - Margins.Right; x++)
+                {
+                    Buffer[y * TotalColumns + x].Character = ' ';
+                    Buffer[y * TotalColumns + x].Foreground = foreground;
+                    Buffer[y * TotalColumns + x].Background = background;
+                }
+
+                if (setActiveColors)
+                {
+                    ActiveForegroundColor = foreground;
+                    ActiveBackgroundColor = background;
                 }
             }
         }
+
+        public void ClearToDefaults()
+            => Clear(DefaultForegroundColor, DefaultBackgroundColor, true);
 
         public void ScrollUp()
         {
