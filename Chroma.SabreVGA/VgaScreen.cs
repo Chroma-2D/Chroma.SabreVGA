@@ -10,7 +10,7 @@ using Chroma.MemoryManagement;
 using Chroma.Windowing;
 using Color = Chroma.Graphics.Color;
 
-namespace SabreVGA
+namespace Chroma.SabreVGA
 {
     public class VgaScreen : DisposableResource
     {

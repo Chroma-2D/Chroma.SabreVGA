@@ -1,6 +1,6 @@
 using Chroma.Graphics;
 
-namespace SabreVGA
+namespace Chroma.SabreVGA
 {
     public struct VgaCell
     {

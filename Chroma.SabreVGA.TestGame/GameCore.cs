@@ -1,13 +1,11 @@
 using System;
 using System.Drawing;
 using System.Numerics;
-using Chroma;
+using Chroma.Diagnostics;
 using Chroma.Diagnostics.Logging;
 using Chroma.Graphics;
 using Chroma.Graphics.TextRendering;
 using Chroma.Input;
-using Chroma.Input.EventArgs;
-using SabreVGA;
 using Color = Chroma.Graphics.Color;
 
 namespace Chroma.SabreVGA.TestGame
@@ -32,14 +30,14 @@ namespace Chroma.SabreVGA.TestGame
             Color.CornflowerBlue
         };
 
-        private Random _rnd = new Random();
+        private Random _rnd = new();
 
         internal GameCore()
         {
-            Window.GoWindowed(new Size(1640, 800), true);
+            Window.GoWindowed(new Size(1024, 600), true);
             Graphics.VerticalSyncMode = VerticalSyncMode.None;
-            
-            Window.QuitRequested += (sender, args) =>
+
+            Window.QuitRequested += (_, _) =>
             {
                 _vga1.Dispose();
                 _vga2.Dispose();
@@ -48,21 +46,20 @@ namespace Chroma.SabreVGA.TestGame
 
         protected override void LoadContent()
         {
-            _ttf = Content.Load<TrueTypeFont>("c64style.ttf", 16);            
+            _ttf = Content.Load<TrueTypeFont>("c64style.ttf", 16);
             _vga1 = new VgaScreen(Vector2.Zero, Window.Size / 4, _ttf, 16, 16);
-            _vga1.Cursor.Offset = new Vector2(0, -1);
             _vga1.Cursor.Padding = new Size(0, 1);
             _vga1.Cursor.Shape = CursorShape.Block;
-            
+            _vga1.Cursor.ForceHidden = true;
+
             _ttf2 = Content.Load<TrueTypeFont>("Nouveau_IBM.ttf", 16);
             _vga2 = new VgaScreen(new Vector2(
                 _vga1.Size.Width + 2,
                 0
             ), Window.Size / 4, _ttf2, 9, 16);
-            _vga2.Cursor.Offset = new Vector2(0, -1);
             _vga2.Cursor.Shape = CursorShape.Underscore;
-            _vga2.Cursor.AllowMovementOutOfWindow = true;
-            
+            _vga2.Cursor.AllowMovementOutOfWindow = false;
+
             DrawFrame(_vga1);
             DrawFrame(_vga2);
         }
@@ -94,17 +91,17 @@ namespace Chroma.SabreVGA.TestGame
 
         protected override void Update(float delta)
         {
-            Window.Title = $"{Window.FPS}";
+            Window.Title = $"{PerformanceCounter.FPS}";
 
             var fgColor = _colors[_rnd.Next() % _colors.Length];
-            var bgColor = _colors[_rnd.Next() % _colors.Length];
+            var bgColor = Color.Black;
 
             var c = '/';
 
-            if (_rnd.Next() % 4 == 0)
+            if (_rnd.Next() % 2 == 0)
                 c = '\\';
-            
-            _vga1.PutCharAt(c, _vga1.Cursor.X, _vga1.Cursor.Y, fgColor, bgColor, _rnd.Next() % 5 == 0);
+
+            _vga1.PutCharAt(c, _vga1.Cursor.X, _vga1.Cursor.Y, fgColor, bgColor, false);
 
             if (_vga1.Cursor.X++ >= _vga1.WindowColumns)
             {
@@ -114,11 +111,12 @@ namespace Chroma.SabreVGA.TestGame
                 {
                     _vga1.ScrollUp();
                 }
-
                 else
+                {
                     _vga1.Cursor.Y++;
+                }
             }
-            
+
             _vga1.Update(delta);
             _vga2.Update(delta);
         }

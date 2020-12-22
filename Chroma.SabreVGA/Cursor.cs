@@ -3,7 +3,7 @@ using System.Numerics;
 using Chroma.Graphics;
 using Color = Chroma.Graphics.Color;
 
-namespace SabreVGA
+namespace Chroma.SabreVGA
 {
     public class Cursor
     {

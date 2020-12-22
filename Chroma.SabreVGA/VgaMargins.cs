@@ -1,4 +1,4 @@
-namespace SabreVGA
+namespace Chroma.SabreVGA
 {
     public struct VgaMargins
     {
