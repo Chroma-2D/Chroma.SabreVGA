@@ -268,7 +268,7 @@ namespace Chroma.SabreVGA
 
         private void DrawBackgroundBuffer(RenderContext context)
         {
-            context.ShapeBlendingEnabled = false;
+            RenderSettings.ShapeBlendingEnabled = false;
             for (var y = 0; y < TotalRows; y++)
             {
                 for (var x = 0; x < TotalColumns; x++)
@@ -281,7 +281,7 @@ namespace Chroma.SabreVGA
                     );
                 }
             }
-            context.ShapeBlendingEnabled = true;
+            RenderSettings.ShapeBlendingEnabled = true;
         }
 
         private void DrawDisplayBuffer(RenderContext context)
