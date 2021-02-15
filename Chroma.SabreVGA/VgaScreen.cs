@@ -6,8 +6,8 @@ using System.Numerics;
 using Chroma.Diagnostics.Logging;
 using Chroma.Graphics;
 using Chroma.Graphics.TextRendering;
+using Chroma.Graphics.TextRendering.TrueType;
 using Chroma.MemoryManagement;
-using Chroma.Windowing;
 using Color = Chroma.Graphics.Color;
 
 namespace Chroma.SabreVGA
@@ -23,7 +23,7 @@ namespace Chroma.SabreVGA
 
         private int BlinkTimer { get; set; }
         private bool BlinkingVisible { get; set; } = true;
-        
+
         private RenderTarget BackgroundRenderTarget { get; set; }
         private RenderTarget ForegroundRenderTarget { get; set; }
 
@@ -42,10 +42,10 @@ namespace Chroma.SabreVGA
             set
             {
                 _size = value;
-                
+
                 BackgroundRenderTarget.Dispose();
                 ForegroundRenderTarget.Dispose();
-                
+
                 FinishInitialization();
             }
         }
@@ -80,7 +80,7 @@ namespace Chroma.SabreVGA
             Margins = new VgaMargins(1, 1, 1, 1);
 
             InCellCharacterOffsets = new Dictionary<char, Vector2>();
-            
+
             FinishInitialization();
         }
 
@@ -184,22 +184,29 @@ namespace Chroma.SabreVGA
 
         public void Draw(RenderContext context)
         {
-            context.RenderTo(BackgroundRenderTarget, () =>
+            if (BackgroundRenderTarget != null)
             {
-                context.Clear(Color.Transparent);
-                DrawBackgroundBuffer(context);
-            });
+                context.RenderTo(BackgroundRenderTarget, () =>
+                {
+                    context.Clear(Color.Transparent);
+                    DrawBackgroundBuffer(context);
+                });
+                
+                context.DrawTexture(BackgroundRenderTarget, Position, Vector2.One, Vector2.Zero, 0f);
+            }
             
-            context.RenderTo(ForegroundRenderTarget, () =>
-            {
-                context.Clear(Color.Transparent);
-                DrawDisplayBuffer(context);
-            });
-            
-            context.DrawTexture(BackgroundRenderTarget, Position, Vector2.One, Vector2.Zero, 0f);
             Cursor.Draw(context);
 
-            context.DrawTexture(ForegroundRenderTarget, Position, Vector2.One, Vector2.Zero, 0f);            
+            if (ForegroundRenderTarget != null)
+            {
+                context.RenderTo(ForegroundRenderTarget, () =>
+                {
+                    context.Clear(Color.Transparent);
+                    DrawDisplayBuffer(context);
+                });
+                
+                context.DrawTexture(ForegroundRenderTarget, Position, Vector2.One, Vector2.Zero, 0f);
+            }
         }
 
         public void RecalculateDimensions()
@@ -249,13 +256,16 @@ namespace Chroma.SabreVGA
         protected override void FreeManagedResources()
         {
             BackgroundRenderTarget.Dispose();
+            BackgroundRenderTarget = null;
+
             ForegroundRenderTarget.Dispose();
+            ForegroundRenderTarget = null;
         }
 
         private void FinishInitialization()
         {
             RecalculateDimensions();
-            
+
             ForegroundRenderTarget = new RenderTarget(Size);
             BackgroundRenderTarget = new RenderTarget(Size);
         }
