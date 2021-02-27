@@ -4,6 +4,10 @@ namespace Chroma.SabreVGA
 {
     public struct VgaCell
     {
+        internal static VgaCell Dummy = new(); // used for out-of-bounds buffer misses
+        
+        public static readonly VgaCell Empty = new();
+        
         public char Character;
         public Color Foreground;
         public Color Background;

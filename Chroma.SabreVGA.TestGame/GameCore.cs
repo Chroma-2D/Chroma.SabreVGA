@@ -32,7 +32,7 @@ namespace Chroma.SabreVGA.TestGame
 
         private Random _rnd = new();
 
-        internal GameCore()
+        internal GameCore() : base(new(false, false))
         {
             Window.GoWindowed(new Size(1024, 600), true);
             Graphics.VerticalSyncMode = VerticalSyncMode.None;
@@ -53,6 +53,9 @@ namespace Chroma.SabreVGA.TestGame
             _vga1.Cursor.ForceHidden = true;
 
             _ttf2 = Content.Load<TrueTypeFont>("Nouveau_IBM.ttf", 16);
+            _ttf2.HintingEnabled = false;
+            _ttf2.ForceAutoHinting = false;
+            
             _vga2 = new VgaScreen(new Vector2(
                 _vga1.Size.Width + 2,
                 0
@@ -66,26 +69,33 @@ namespace Chroma.SabreVGA.TestGame
 
         protected override void KeyPressed(KeyEventArgs e)
         {
-            if (e.KeyCode == KeyCode.Up)
-                _vga2.Cursor.Y--;
-            else if (e.KeyCode == KeyCode.Down)
-                _vga2.Cursor.Y++;
-            else if (e.KeyCode == KeyCode.Right)
-                _vga2.Cursor.X++;
-            else if (e.KeyCode == KeyCode.Left)
-                _vga2.Cursor.X--;
-            else if (e.KeyCode == KeyCode.Home)
-                _vga2.Cursor.X = 0;
-            else if (e.KeyCode == KeyCode.End)
-                _vga2.Cursor.X = _vga2.TotalColumns;
-            else if (e.KeyCode == KeyCode.F1)
-                _vga2.Clear();
-            else if (e.KeyCode == KeyCode.F2)
-                _vga2.ScrollUp();
-            else if (e.KeyCode == KeyCode.Return)
+            switch (e.KeyCode)
             {
-                _vga2.Cursor.X = 0;
-                _vga2.Cursor.Y++;
+                case KeyCode.Up:
+                    _vga2.Cursor.Y--;
+                    break;
+                case KeyCode.Down:
+                    _vga2.Cursor.Y++;
+                    break;
+                case KeyCode.Right:
+                    _vga2.Cursor.X++;
+                    break;
+                case KeyCode.Left:
+                    _vga2.Cursor.X--;
+                    break;
+                case KeyCode.Home:
+                    _vga2.Cursor.X = 0;
+                    break;
+                case KeyCode.End:
+                    _vga2.Cursor.X = _vga2.TotalColumns;
+                    break;
+                case KeyCode.F2:
+                    _vga2.Scroll();
+                    break;
+                case KeyCode.Return:
+                    _vga2.Cursor.X = 0;
+                    _vga2.Cursor.Y++;
+                    break;
             }
         }
 
@@ -109,7 +119,7 @@ namespace Chroma.SabreVGA.TestGame
 
                 if (_vga1.Cursor.Y + 1 > _vga1.WindowRows)
                 {
-                    _vga1.ScrollUp();
+                    _vga1.Scroll();
                 }
                 else
                 {

@@ -7,6 +7,11 @@ namespace Chroma.SabreVGA
         public byte Right;
         public byte Bottom;
 
+        public VgaMargins(byte uniform)
+            : this(uniform, uniform, uniform, uniform)
+        {
+        }
+
         public VgaMargins(byte left, byte top, byte right, byte bottom)
         {
             Left = left;
