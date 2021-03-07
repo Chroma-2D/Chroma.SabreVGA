@@ -4,6 +4,7 @@ using System.Numerics;
 using Chroma.Diagnostics;
 using Chroma.Diagnostics.Logging;
 using Chroma.Graphics;
+using Chroma.Graphics.TextRendering.Bitmap;
 using Chroma.Graphics.TextRendering.TrueType;
 using Chroma.Input;
 using Color = Chroma.Graphics.Color;
@@ -13,7 +14,7 @@ namespace Chroma.SabreVGA.TestGame
     internal class GameCore : Game
     {
         private TrueTypeFont _ttf;
-        private TrueTypeFont _ttf2;
+        private BitmapFont _bmf;
         private VgaScreen _vga1;
         private VgaScreen _vga2;
 
@@ -52,14 +53,12 @@ namespace Chroma.SabreVGA.TestGame
             _vga1.Cursor.Shape = CursorShape.Block;
             _vga1.Cursor.ForceHidden = true;
 
-            _ttf2 = Content.Load<TrueTypeFont>("Nouveau_IBM.ttf", 16);
-            _ttf2.HintingEnabled = false;
-            _ttf2.ForceAutoHinting = false;
+            _bmf = Content.Load<BitmapFont>("vga437.fnt");
             
             _vga2 = new VgaScreen(new Vector2(
                 _vga1.Size.Width + 2,
                 0
-            ), Window.Size / 4, _ttf2, 9, 16);
+            ), Window.Size / 4, _bmf, 9, 16);
             _vga2.Cursor.Shape = CursorShape.Underscore;
             _vga2.Cursor.AllowMovementOutOfWindow = false;
 

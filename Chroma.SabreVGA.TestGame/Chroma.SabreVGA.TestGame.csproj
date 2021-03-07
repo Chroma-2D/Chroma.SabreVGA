@@ -6,11 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Chroma" Version="0.37.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Content" />
+        <PackageReference Include="Chroma" Version="0.37.4" />
     </ItemGroup>
 
     <ItemGroup>
@@ -33,6 +29,12 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="Content\c64style.ttf">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Content\vga437.fnt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Content\vga437_0.png">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

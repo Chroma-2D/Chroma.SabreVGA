@@ -5,6 +5,7 @@ using System.Numerics;
 using Chroma.Diagnostics.Logging;
 using Chroma.Graphics;
 using Chroma.Graphics.TextRendering;
+using Chroma.Graphics.TextRendering.Bitmap;
 using Chroma.Graphics.TextRendering.TrueType;
 using Chroma.MemoryManagement;
 using Color = Chroma.Graphics.Color;
@@ -28,7 +29,7 @@ namespace Chroma.SabreVGA
 
         public int CellBlinkInterval { get; set; } = 500;
 
-        public TrueTypeFont Font { get; private set; }
+        public ConsoleFont Font { get; private set; }
         public Cursor Cursor { get; private set; }
 
         public Vector2 Position { get; set; }
@@ -79,12 +80,27 @@ namespace Chroma.SabreVGA
             }
         }
 
-        public VgaScreen(Vector2 position, Size size, TrueTypeFont font, int cellWidth, int cellHeight)
+        public VgaScreen(Vector2 position, Size size, TrueTypeFont trueTypeFont, int cellWidth, int cellHeight)
         {
             Position = position;
             _size = size;
 
-            Font = font;
+            Font = new ConsoleFont(trueTypeFont);
+
+            CellWidth = cellWidth;
+            CellHeight = cellHeight;
+
+            Cursor = new Cursor(this);
+
+            FinishInitialization();
+        }
+
+        public VgaScreen(Vector2 position, Size size, BitmapFont bitmapFont, int cellWidth, int cellHeight)
+        {
+            Position = position;
+            _size = size;
+
+            Font = new ConsoleFont(bitmapFont);
 
             CellWidth = cellWidth;
             CellHeight = cellHeight;
@@ -207,30 +223,60 @@ namespace Chroma.SabreVGA
                 var y1 = y;
                 var pos = new Vector2(0, (y1 - Margins.Top) * CellHeight);
 
-                context.DrawString(
-                    Font,
-                    str,
-                    pos,
-                    (c, i, p, g) =>
-                    {
-                        var offset = Vector2.Zero;
-
-                        if (InnerCharacterOffsets.ContainsKey(c))
-                            offset = InnerCharacterOffsets[c];
-
-                        var cell = _buffer[y1 * TotalColumns + i];
-
-                        return new GlyphTransformData(
-                            new Vector2(
-                                (i * CellWidth) + (CellWidth / 2) - (int)(g.BitmapSize.X / 2),
-                                (Margins.Top * CellHeight) + p.Y
-                            ) + offset
-                        )
+                if (Font.IsTrueTypeFont)
+                {
+                    context.DrawString(
+                        Font.TrueTypeFont,
+                        str,
+                        pos,
+                        (c, i, p, g) =>
                         {
-                            Color = (cell.Blink && !_blinkingCellsVisible) ? Color.Transparent : cell.Foreground
-                        };
-                    }
-                );
+                            var offset = Vector2.Zero;
+
+                            if (InnerCharacterOffsets.ContainsKey(c))
+                                offset = InnerCharacterOffsets[c];
+
+                            var cell = _buffer[y1 * TotalColumns + i];
+
+                            return new GlyphTransformData(
+                                new Vector2(
+                                    (i * CellWidth) + (CellWidth / 2) - (int)(g.BitmapSize.X / 2),
+                                    (Margins.Top * CellHeight) + p.Y
+                                ) + offset
+                            )
+                            {
+                                Color = (cell.Blink && !_blinkingCellsVisible) ? Color.Transparent : cell.Foreground
+                            };
+                        }
+                    );
+                }
+                else
+                {
+                    context.DrawString(
+                        Font.BitmapFont,
+                        str,
+                        pos,
+                        (c, i, p, g) =>
+                        {
+                            var offset = Vector2.Zero;
+
+                            if (InnerCharacterOffsets.ContainsKey(c))
+                                offset = InnerCharacterOffsets[c];
+
+                            var cell = _buffer[y1 * TotalColumns + i];
+
+                            return new GlyphTransformData(
+                                new Vector2(
+                                    (i * CellWidth) + (CellWidth / 2) - g.Width / 2,
+                                    (Margins.Top * CellHeight) + p.Y
+                                ) + offset
+                            )
+                            {
+                                Color = (cell.Blink && !_blinkingCellsVisible) ? Color.Transparent : cell.Foreground
+                            };
+                        }
+                    );
+                }
             }
         }
     }
