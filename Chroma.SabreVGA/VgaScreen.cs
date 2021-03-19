@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using Chroma.Diagnostics.Logging;
@@ -29,7 +28,7 @@ namespace Chroma.SabreVGA
 
         public int CellBlinkInterval { get; set; } = 500;
 
-        public ConsoleFont Font { get; private set; }
+        public ConsoleFont Font { get; set; }
         public Cursor Cursor { get; private set; }
 
         public Vector2 Position { get; set; }
@@ -61,8 +60,6 @@ namespace Chroma.SabreVGA
         public Color ActiveForegroundColor { get; set; } = DefaultForegroundColor;
         public Color ActiveBackgroundColor { get; set; } = DefaultBackgroundColor;
 
-        public Dictionary<char, Vector2> InnerCharacterOffsets { get; } = new();
-
         public ref VgaCell this[int linearAddress]
             => ref _buffer[linearAddress];
 
@@ -80,12 +77,12 @@ namespace Chroma.SabreVGA
             }
         }
 
-        public VgaScreen(Vector2 position, Size size, TrueTypeFont trueTypeFont, int cellWidth, int cellHeight)
+        public VgaScreen(Vector2 position, Size size, ConsoleFont font, int cellWidth, int cellHeight)
         {
             Position = position;
             _size = size;
 
-            Font = new ConsoleFont(trueTypeFont);
+            Font = font;
 
             CellWidth = cellWidth;
             CellHeight = cellHeight;
@@ -95,19 +92,14 @@ namespace Chroma.SabreVGA
             FinishInitialization();
         }
 
-        public VgaScreen(Vector2 position, Size size, BitmapFont bitmapFont, int cellWidth, int cellHeight)
+        public VgaScreen(Vector2 position, Size size, TrueTypeFont trueTypeFont, int cellWidth, int cellHeight)
+            : this(position, size, new ConsoleFont(trueTypeFont), cellWidth, cellHeight)
         {
-            Position = position;
-            _size = size;
+        }
 
-            Font = new ConsoleFont(bitmapFont);
-
-            CellWidth = cellWidth;
-            CellHeight = cellHeight;
-
-            Cursor = new Cursor(this);
-
-            FinishInitialization();
+        public VgaScreen(Vector2 position, Size size, BitmapFont bitmapFont, int cellWidth, int cellHeight)
+            : this(position, size, new ConsoleFont(bitmapFont), cellWidth, cellHeight)
+        {
         }
 
         public void Update(float delta)
@@ -144,11 +136,22 @@ namespace Chroma.SabreVGA
                 context.RenderTo(ForegroundRenderTarget, () =>
                 {
                     context.Clear(Color.Transparent);
-                    DrawDisplayBuffer(context);
+                    DrawForegroundBuffer(context);
                 });
 
                 context.DrawTexture(ForegroundRenderTarget, Position, Vector2.One, Vector2.Zero, 0f);
             }
+        }
+
+        public void SetCellSizes(int cellWidth, int cellHeight)
+        {
+            CellWidth = cellWidth;
+            CellHeight = cellHeight;
+            
+            BackgroundRenderTarget?.Dispose();
+            ForegroundRenderTarget?.Dispose();
+            
+            FinishInitialization();
         }
 
         public void RecalculateDimensions()
@@ -211,14 +214,14 @@ namespace Chroma.SabreVGA
             RenderSettings.ShapeBlendingEnabled = true;
         }
 
-        private void DrawDisplayBuffer(RenderContext context)
+        private void DrawForegroundBuffer(RenderContext context)
         {
             for (var y = 0; y < TotalRows; y++)
             {
                 var start = y * TotalColumns;
                 var end = start + TotalColumns;
 
-                var str = new string(_buffer[start..end].Select(c => c.Character).ToArray());
+                var bufferLine = new string(_buffer[start..end].Select(c => c.Character).ToArray());
 
                 var y1 = y;
                 var pos = new Vector2(0, (y1 - Margins.Top) * CellHeight);
@@ -227,22 +230,17 @@ namespace Chroma.SabreVGA
                 {
                     context.DrawString(
                         Font.TrueTypeFont,
-                        str,
+                        bufferLine,
                         pos,
-                        (c, i, p, g) =>
+                        (_, i, p, _) =>
                         {
-                            var offset = Vector2.Zero;
-
-                            if (InnerCharacterOffsets.ContainsKey(c))
-                                offset = InnerCharacterOffsets[c];
-
                             var cell = _buffer[y1 * TotalColumns + i];
 
                             return new GlyphTransformData(
                                 new Vector2(
-                                    (i * CellWidth) + (CellWidth / 2) - (int)(g.BitmapSize.X / 2),
-                                    (Margins.Top * CellHeight) + p.Y
-                                ) + offset
+                                    p.X,
+                                    Margins.Top * CellHeight + p.Y
+                                )
                             )
                             {
                                 Color = (cell.Blink && !_blinkingCellsVisible) ? Color.Transparent : cell.Foreground
@@ -254,20 +252,16 @@ namespace Chroma.SabreVGA
                 {
                     context.DrawString(
                         Font.BitmapFont,
-                        str,
+                        bufferLine,
                         pos,
-                        (c, i, p, g) =>
+                        (_, i, p, _) =>
                         {
                             var offset = Vector2.Zero;
-
-                            if (InnerCharacterOffsets.ContainsKey(c))
-                                offset = InnerCharacterOffsets[c];
-
                             var cell = _buffer[y1 * TotalColumns + i];
 
                             return new GlyphTransformData(
                                 new Vector2(
-                                    (i * CellWidth) + (CellWidth / 2) - g.Width / 2,
+                                    p.X,
                                     (Margins.Top * CellHeight) + p.Y
                                 ) + offset
                             )
