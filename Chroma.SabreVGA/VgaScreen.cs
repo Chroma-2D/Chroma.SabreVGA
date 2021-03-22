@@ -4,8 +4,6 @@ using System.Numerics;
 using Chroma.Diagnostics.Logging;
 using Chroma.Graphics;
 using Chroma.Graphics.TextRendering;
-using Chroma.Graphics.TextRendering.Bitmap;
-using Chroma.Graphics.TextRendering.TrueType;
 using Chroma.MemoryManagement;
 using Color = Chroma.Graphics.Color;
 
@@ -28,7 +26,7 @@ namespace Chroma.SabreVGA
 
         public int CellBlinkInterval { get; set; } = 500;
 
-        public ConsoleFont Font { get; set; }
+        public IFontProvider Font { get; set; }
         public Cursor Cursor { get; private set; }
 
         public Vector2 Position { get; set; }
@@ -77,7 +75,7 @@ namespace Chroma.SabreVGA
             }
         }
 
-        public VgaScreen(Vector2 position, Size size, ConsoleFont font, int cellWidth, int cellHeight)
+        public VgaScreen(Vector2 position, Size size, IFontProvider font, int cellWidth, int cellHeight)
         {
             Position = position;
             _size = size;
@@ -90,16 +88,6 @@ namespace Chroma.SabreVGA
             Cursor = new Cursor(this);
 
             FinishInitialization();
-        }
-
-        public VgaScreen(Vector2 position, Size size, TrueTypeFont trueTypeFont, int cellWidth, int cellHeight)
-            : this(position, size, new ConsoleFont(trueTypeFont), cellWidth, cellHeight)
-        {
-        }
-
-        public VgaScreen(Vector2 position, Size size, BitmapFont bitmapFont, int cellWidth, int cellHeight)
-            : this(position, size, new ConsoleFont(bitmapFont), cellWidth, cellHeight)
-        {
         }
 
         public void Update(float delta)
@@ -147,10 +135,10 @@ namespace Chroma.SabreVGA
         {
             CellWidth = cellWidth;
             CellHeight = cellHeight;
-            
+
             BackgroundRenderTarget?.Dispose();
             ForegroundRenderTarget?.Dispose();
-            
+
             FinishInitialization();
         }
 
@@ -226,51 +214,25 @@ namespace Chroma.SabreVGA
                 var y1 = y;
                 var pos = new Vector2(0, (y1 - Margins.Top) * CellHeight);
 
-                if (Font.IsTrueTypeFont)
-                {
-                    context.DrawString(
-                        Font.TrueTypeFont,
-                        bufferLine,
-                        pos,
-                        (_, i, p, _) =>
-                        {
-                            var cell = _buffer[y1 * TotalColumns + i];
+                context.DrawString(
+                    Font,
+                    bufferLine,
+                    pos,
+                    (_, i, p) =>
+                    {
+                        var cell = _buffer[y1 * TotalColumns + i];
 
-                            return new GlyphTransformData(
-                                new Vector2(
-                                    p.X,
-                                    Margins.Top * CellHeight + p.Y
-                                )
+                        return new GlyphTransformData(
+                            new Vector2(
+                                p.X,
+                                Margins.Top * CellHeight + p.Y
                             )
-                            {
-                                Color = (cell.Blink && !_blinkingCellsVisible) ? Color.Transparent : cell.Foreground
-                            };
-                        }
-                    );
-                }
-                else
-                {
-                    context.DrawString(
-                        Font.BitmapFont,
-                        bufferLine,
-                        pos,
-                        (_, i, p, _) =>
+                        )
                         {
-                            var offset = Vector2.Zero;
-                            var cell = _buffer[y1 * TotalColumns + i];
-
-                            return new GlyphTransformData(
-                                new Vector2(
-                                    p.X,
-                                    (Margins.Top * CellHeight) + p.Y
-                                ) + offset
-                            )
-                            {
-                                Color = (cell.Blink && !_blinkingCellsVisible) ? Color.Transparent : cell.Foreground
-                            };
-                        }
-                    );
-                }
+                            Color = (cell.Blink && !_blinkingCellsVisible) ? Color.Transparent : cell.Foreground
+                        };
+                    }
+                );
             }
         }
     }
