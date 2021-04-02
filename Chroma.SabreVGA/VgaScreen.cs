@@ -229,7 +229,9 @@ namespace Chroma.SabreVGA
                             )
                         )
                         {
-                            Color = (cell.Blink && !_blinkingCellsVisible) ? Color.Transparent : cell.Foreground
+                            Color = (cell.Blink && !_blinkingCellsVisible) 
+                                ? Color.Transparent 
+                                : cell.Foreground
                         };
                     }
                 );

@@ -5,28 +5,25 @@ namespace Chroma.SabreVGA
     public static class VgaScreenExtensions
     {
         public static void PutCharAt(this VgaScreen screen,
-            char character, int x, int y)
-        {
-            PutCharAt(
-                screen,
-                character,
-                x,
-                y,
-                screen.ActiveForegroundColor,
-                screen.ActiveBackgroundColor,
-                false
-            );
-        }
-
-        public static void PutCharAt(this VgaScreen screen,
-            char character, int x, int y, Color foreground, Color background, bool blink)
+            int x, int y, char character)
         {
             screen[x, y].Character = character;
-            screen[x, y].Foreground = foreground;
-            screen[x, y].Background = background;
+        }
+        
+        public static void PutCharAt(this VgaScreen screen,
+            int x, int y, char character, bool blink)
+        {
+            screen[x, y].Character = character;
             screen[x, y].Blink = blink;
         }
 
+        public static void PutCharAt(this VgaScreen screen,
+            int x, int y, char character, Color foreground, Color background, bool blink)
+        {
+            screen.SetColorAt(x, y, foreground, background);
+            screen.PutCharAt(x, y, character, blink);
+        }
+        
         public static void SetColorAt(this VgaScreen screen,
             int x, int y, Color foreground, Color background)
         {

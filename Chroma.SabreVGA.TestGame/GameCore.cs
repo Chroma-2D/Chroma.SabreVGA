@@ -54,7 +54,7 @@ namespace Chroma.SabreVGA.TestGame
             _vga1.Cursor.ForceHidden = true;
 
             _bmf = Content.Load<BitmapFont>("vga437.fnt");
-            
+
             _vga2 = new VgaScreen(new Vector2(
                 _vga1.Size.Width + 2,
                 0
@@ -110,7 +110,7 @@ namespace Chroma.SabreVGA.TestGame
             if (_rnd.Next() % 2 == 0)
                 c = '\\';
 
-            _vga1.PutCharAt(c, _vga1.Cursor.X, _vga1.Cursor.Y, fgColor, bgColor, false);
+            _vga1.PutCharAt(_vga1.Cursor.X, _vga1.Cursor.Y, c, fgColor, bgColor, false);
 
             if (_vga1.Cursor.X++ >= _vga1.WindowColumns)
             {
@@ -132,7 +132,7 @@ namespace Chroma.SabreVGA.TestGame
 
         protected override void TextInput(TextInputEventArgs e)
         {
-            _vga2.PutCharAt(e.Text[0], _vga2.Cursor.X++, _vga2.Cursor.Y);
+            _vga2.PutCharAt(_vga2.Cursor.X++, _vga2.Cursor.Y, e.Text[0]);
         }
 
         protected override void Draw(RenderContext context)
@@ -149,27 +149,27 @@ namespace Chroma.SabreVGA.TestGame
                 {
                     if (x == 0 && y == 0)
                     {
-                        vga.PutCharAt('+', x, y);
+                        vga.PutCharAt(x, y, '+');
                     }
                     else if (x == vga.TotalColumns - 1 && y == 0)
                     {
-                        vga.PutCharAt('+', x, y);
+                        vga.PutCharAt(x, y, '+');
                     }
                     else if (x == 0 && y == vga.TotalRows - 1)
                     {
-                        vga.PutCharAt('+', x, y);
+                        vga.PutCharAt(x, y, '+');
                     }
                     else if (x == vga.TotalColumns - 1 && y == vga.TotalRows - 1)
                     {
-                        vga.PutCharAt('+', x, y);
+                        vga.PutCharAt(x, y, '+');
                     }
                     else if (x == 0 || x == vga.TotalColumns - 1)
                     {
-                        vga.PutCharAt('|', x, y);
+                        vga.PutCharAt(x, y, '|');
                     }
                     else if (y == 0 || y == vga.TotalRows - 1)
                     {
-                        vga.PutCharAt('-', x, y);
+                        vga.PutCharAt(x, y, '-');
                     }
                 }
             }

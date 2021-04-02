@@ -54,7 +54,7 @@ namespace Chroma.SabreVGA
         public CursorShape Shape { get; set; } = CursorShape.Block;
         public Vector2 Offset { get; set; }
         public Size Padding { get; set; }
-        
+
         public void ResetState()
         {
             _timer = 0;
@@ -76,19 +76,26 @@ namespace Chroma.SabreVGA
                 switch (Shape)
                 {
                     case CursorShape.Block:
-                        context.Rectangle(
-                            ShapeMode.Fill,
-                            new Vector2(
-                                X * VgaScreen.CellWidth,
-                                Y * VgaScreen.CellHeight
-                            ) + Offset + VgaScreen.Position,
-                            new Size(
-                                VgaScreen.CellWidth,
-                                VgaScreen.CellHeight
-                            ) + Padding,
-                            Color
-                        );
+                    {
+                        RenderSettings.ShapeBlendingEnabled = true;
+                        RenderSettings.SetShapeBlendingPreset(BlendingPreset.Subtract);
+                        {
+                            context.Rectangle(
+                                ShapeMode.Fill,
+                                new Vector2(
+                                    X * VgaScreen.CellWidth,
+                                    Y * VgaScreen.CellHeight
+                                ) + Offset + VgaScreen.Position,
+                                new Size(
+                                    VgaScreen.CellWidth,
+                                    VgaScreen.CellHeight
+                                ) + Padding,
+                                Color
+                            );
+                        }
+                        RenderSettings.ShapeBlendingEnabled = false;
                         break;
+                    }
 
                     case CursorShape.Pipe:
                         context.Rectangle(
@@ -154,7 +161,7 @@ namespace Chroma.SabreVGA
             var topMostBounds = 0;
             var rightMostBounds = VgaScreen.TotalColumns - 1;
             var bottomMostBounds = VgaScreen.TotalRows - 1;
-            
+
             if (!AllowMovementOutOfWindow)
             {
                 leftMostBounds = VgaScreen.Margins.Left;
