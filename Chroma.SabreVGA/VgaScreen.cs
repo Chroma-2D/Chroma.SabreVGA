@@ -199,7 +199,6 @@ namespace Chroma.SabreVGA
                     );
                 }
             }
-            RenderSettings.ShapeBlendingEnabled = true;
         }
 
         private void DrawForegroundBuffer(RenderContext context)
