@@ -35,7 +35,7 @@ namespace Chroma.SabreVGA.TestGame
 
         internal GameCore() : base(new(false, false))
         {
-            Window.GoWindowed(new Size(1024, 600), true);
+            Window.Mode.SetWindowed(1024, 600, true);
             Graphics.VerticalSyncMode = VerticalSyncMode.None;
 
             Window.QuitRequested += (_, _) =>

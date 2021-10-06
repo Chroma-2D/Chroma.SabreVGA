@@ -217,21 +217,17 @@ namespace Chroma.SabreVGA
                     Font,
                     bufferLine,
                     pos,
-                    (_, i, p) =>
+                    (d, _, i, p) =>
                     {
                         var cell = _buffer[y1 * TotalColumns + i];
+                        d.Position = new Vector2(
+                            p.X,
+                            Margins.Top * CellHeight + p.Y
+                        );
 
-                        return new GlyphTransformData(
-                            new Vector2(
-                                p.X,
-                                Margins.Top * CellHeight + p.Y
-                            )
-                        )
-                        {
-                            Color = (cell.Blink && !_blinkingCellsVisible) 
-                                ? Color.Transparent 
-                                : cell.Foreground
-                        };
+                        d.Color = (cell.Blink && !_blinkingCellsVisible)
+                            ? Color.Transparent
+                            : cell.Foreground;
                     }
                 );
             }
