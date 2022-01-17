@@ -31,6 +31,23 @@ namespace Chroma.SabreVGA
             screen[x, y].Background = background;
         }
 
+        public static void ClearToColor(this VgaScreen screen,
+            Color foreground, Color background)
+        {
+            screen.ActiveForegroundColor = foreground;
+            screen.ActiveBackgroundColor = background;
+            
+            for (var y = 0; y < screen.TotalRows; y++)
+            {
+                for (var x = 0; x < screen.TotalColumns; x++)
+                {
+                    screen[x, y].Character = ' ';
+                    screen[x, y].Blink = false;
+                    screen.SetColorAt(x, y, foreground, background);
+                }
+            }
+        }
+
         public static void Scroll(this VgaScreen screen)
         {
             for (var y = screen.Margins.Top + 1; y < screen.TotalRows - screen.Margins.Bottom; y++)

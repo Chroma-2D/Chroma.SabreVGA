@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Numerics;
 using Chroma.Graphics;
 using Color = Chroma.Graphics.Color;
@@ -7,7 +8,6 @@ namespace Chroma.SabreVGA
 {
     public class Cursor
     {
-        private bool _visible;
         private int _timer;
 
         private int _x;
@@ -46,19 +46,26 @@ namespace Chroma.SabreVGA
         }
 
         public int BlinkInterval { get; set; } = 250;
+
+        public bool Blink { get; set; } = true;
+        public bool Visible { get; set; }
+
         public Color Color { get; set; } = Color.White;
-        public bool ForceVisible { get; set; }
-        public bool ForceHidden { get; set; }
         public bool AllowMovementOutOfWindow { get; set; }
 
         public CursorShape Shape { get; set; } = CursorShape.Block;
         public Vector2 Offset { get; set; }
         public Size Padding { get; set; }
 
-        public void ResetState()
+        public void Reset()
         {
             _timer = 0;
-            _visible = true;
+            _x = 0;
+            _y = 0;
+
+            Visible = true;
+            Blink = true;
+            AllowMovementOutOfWindow = false;
         }
 
         internal Cursor(VgaScreen vgaScreen)
@@ -71,88 +78,101 @@ namespace Chroma.SabreVGA
 
         internal void Draw(RenderContext context)
         {
-            if (_visible)
+            if (Visible)
             {
+                RenderSettings.ShapeBlendingEnabled = true;
+                RenderSettings.SetShapeBlendingFunctions(
+                    BlendingFunction.OneMinusDestinationColor,
+                    BlendingFunction.Zero,
+                    BlendingFunction.Zero,
+                    BlendingFunction.Zero
+                );
+                
                 switch (Shape)
                 {
                     case CursorShape.Block:
                     {
-                        RenderSettings.ShapeBlendingEnabled = true;
-                        RenderSettings.SetShapeBlendingPreset(BlendingPreset.Subtract);
-                        {
-                            context.Rectangle(
-                                ShapeMode.Fill,
-                                new Vector2(
-                                    X * VgaScreen.CellWidth,
-                                    Y * VgaScreen.CellHeight
-                                ) + Offset + VgaScreen.Position,
-                                new Size(
-                                    VgaScreen.CellWidth,
-                                    VgaScreen.CellHeight
-                                ) + Padding,
-                                Color
-                            );
-                        }
-                        RenderSettings.ShapeBlendingEnabled = false;
+                        DrawBlock(context);
                         break;
                     }
 
                     case CursorShape.Pipe:
-                        context.Rectangle(
-                            ShapeMode.Fill,
-                            new Vector2(
-                                X * VgaScreen.CellWidth,
-                                Y * VgaScreen.CellHeight
-                            ) + Offset + VgaScreen.Position,
-                            new Size(
-                                1,
-                                VgaScreen.CellHeight
-                            ) + Padding,
-                            Color
-                        );
+                    {
+                        DrawPipe(context);
                         break;
+                    }
 
                     case CursorShape.Underscore:
-                        context.Rectangle(
-                            ShapeMode.Fill,
-                            new Vector2(
-                                X * VgaScreen.CellWidth,
-                                Y * VgaScreen.CellHeight + VgaScreen.CellHeight - 2
-                            ) + Offset + VgaScreen.Position,
-                            new Size(
-                                VgaScreen.CellWidth,
-                                2
-                            ) + Padding,
-                            Color
-                        );
+                    {
+                        DrawUnderscore(context);
                         break;
+                    }
                 }
             }
         }
 
         internal void Update(float delta)
         {
-            if (ForceHidden)
+            if (Blink)
             {
-                _visible = false;
-                return;
+                if (_timer >= BlinkInterval)
+                {
+                    Visible = !Visible;
+                    _timer = 0;
+
+                    return;
+                }
+
+                _timer += (int)(1000 * delta);
             }
+        }
 
-            if (ForceVisible)
-            {
-                _visible = true;
-                return;
-            }
+        private void DrawBlock(RenderContext context)
+        {           
+            context.Rectangle(
+                ShapeMode.Fill,
+                new Vector2(
+                    X * VgaScreen.CellWidth,
+                    Y * VgaScreen.CellHeight
+                ) + Offset + VgaScreen.Position,
+                new Size(
+                    VgaScreen.CellWidth,
+                    VgaScreen.CellHeight
+                ) + Padding,
+                Color
+            );
+        }
 
-            if (_timer >= BlinkInterval)
-            {
-                _visible = !_visible;
-                _timer = 0;
+        private void DrawPipe(RenderContext context)
+        {
+            context.Rectangle(
+                ShapeMode.Fill,
+                new Vector2(
+                    X * VgaScreen.CellWidth,
+                    Y * VgaScreen.CellHeight
+                ) + Offset + VgaScreen.Position,
+                new Size(
+                    1,
+                    VgaScreen.CellHeight
+                ) + Padding,
+                Color
+            );
+        }
 
-                return;
-            }
-
-            _timer += (int)(1000 * delta);
+        private void DrawUnderscore(RenderContext context)
+        {
+            context.Rectangle(
+                ShapeMode.Fill,
+                new Vector2(
+                    X * VgaScreen.CellWidth,
+                    Y * VgaScreen.CellHeight + VgaScreen.CellHeight - 2
+                ) + Offset + VgaScreen.Position,
+                new Size(
+                    VgaScreen.CellWidth,
+                    2
+                ) + Padding,
+                Color
+            );
         }
 
         private void EnsureInBounds()

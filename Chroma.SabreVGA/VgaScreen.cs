@@ -11,7 +11,7 @@ namespace Chroma.SabreVGA
 {
     public class VgaScreen : DisposableResource
     {
-        public static readonly Color DefaultBackgroundColor = Color.Transparent;
+        public static readonly Color DefaultBackgroundColor = Color.Black;
         public static readonly Color DefaultForegroundColor = Color.Gray;
 
         private static readonly Log _log = LogManager.GetForCurrentAssembly();
@@ -100,7 +100,7 @@ namespace Chroma.SabreVGA
                 _blinkTimer = 0;
             }
 
-            Cursor.Color = ActiveForegroundColor;
+            Cursor.Color = this[Cursor.X, Cursor.Y].Foreground;
             Cursor.Update(delta);
         }
 
@@ -117,8 +117,6 @@ namespace Chroma.SabreVGA
                 context.DrawTexture(BackgroundRenderTarget, Position, Vector2.One, Vector2.Zero, 0f);
             }
 
-            Cursor.Draw(context);
-
             if (ForegroundRenderTarget != null)
             {
                 context.RenderTo(ForegroundRenderTarget, () =>
@@ -129,6 +127,8 @@ namespace Chroma.SabreVGA
 
                 context.DrawTexture(ForegroundRenderTarget, Position, Vector2.One, Vector2.Zero, 0f);
             }
+            
+            Cursor.Draw(context);
         }
 
         public void SetCellSizes(int cellWidth, int cellHeight)
@@ -187,6 +187,7 @@ namespace Chroma.SabreVGA
         private void DrawBackgroundBuffer(RenderContext context)
         {
             RenderSettings.ShapeBlendingEnabled = false;
+            
             for (var y = 0; y < TotalRows; y++)
             {
                 for (var x = 0; x < TotalColumns; x++)
