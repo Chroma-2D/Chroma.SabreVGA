@@ -14,6 +14,7 @@ namespace Chroma.SabreVGA.TestGame
     internal class GameCore : Game
     {
         private TrueTypeFont _ttf;
+        private TrueTypeFont _ttf2;
         private BitmapFont _bmf;
         private VgaScreen _vga1;
         private VgaScreen _vga2;
@@ -51,14 +52,17 @@ namespace Chroma.SabreVGA.TestGame
             _vga1 = new VgaScreen(Vector2.Zero, Window.Size / 4, _ttf, 16, 16);
             _vga1.Cursor.Padding = new Size(0, 1);
             _vga1.Cursor.Shape = CursorShape.Block;
-            _vga1.Cursor.ForceHidden = true;
-
+            _vga1.Cursor.Blink = false;
+            _vga1.Cursor.Visible = true;
+            
             _bmf = Content.Load<BitmapFont>("vga437.fnt");
-
+            _ttf2 = Content.Load<TrueTypeFont>("MODENINE.TTF", 16);
+            
             _vga2 = new VgaScreen(new Vector2(
                 _vga1.Size.Width + 2,
                 0
-            ), Window.Size / 4, _bmf, 9, 16);
+            ), Window.Size / 4, _ttf2, 8, 16);
+            _vga2.ClearToColor(Color.Cyan, Color.Black);
             _vga2.Cursor.Shape = CursorShape.Underscore;
             _vga2.Cursor.AllowMovementOutOfWindow = false;
 
