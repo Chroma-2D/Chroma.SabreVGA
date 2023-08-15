@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Numerics;
 using Chroma.Graphics;
 using Color = Chroma.Graphics.Color;
@@ -9,6 +8,7 @@ namespace Chroma.SabreVGA
     public class Cursor
     {
         private int _timer;
+        private bool _show;
 
         private int _x;
         private int _y;
@@ -45,10 +45,10 @@ namespace Chroma.SabreVGA
             }
         }
 
-        public int BlinkInterval { get; set; } = 250;
+        public int BlinkInterval { get; set; } = 225;
 
         public bool Blink { get; set; } = true;
-        public bool Visible { get; set; }
+        public bool IsVisible { get; set; } = true;
 
         public Color Color { get; set; } = Color.White;
         public bool AllowMovementOutOfWindow { get; set; }
@@ -62,30 +62,26 @@ namespace Chroma.SabreVGA
             _timer = 0;
             _x = 0;
             _y = 0;
-
-            Visible = true;
-            Blink = true;
-            AllowMovementOutOfWindow = false;
         }
 
         internal Cursor(VgaScreen vgaScreen)
         {
-            _x = 0;
-            _y = 0;
-
             VgaScreen = vgaScreen;
         }
 
         internal void Draw(RenderContext context)
         {
-            if (Visible)
+            if (!IsVisible)
+                return;
+            
+            if (_show)
             {
                 RenderSettings.ShapeBlendingEnabled = true;
                 RenderSettings.SetShapeBlendingFunctions(
                     BlendingFunction.OneMinusDestinationColor,
+                    BlendingFunction.OneMinusDestinationAlpha,
                     BlendingFunction.Zero,
-                    BlendingFunction.Zero,
-                    BlendingFunction.Zero
+                    BlendingFunction.One
                 );
                 
                 switch (Shape)
@@ -117,7 +113,7 @@ namespace Chroma.SabreVGA
             {
                 if (_timer >= BlinkInterval)
                 {
-                    Visible = !Visible;
+                    _show = !_show;
                     _timer = 0;
 
                     return;

@@ -16,13 +16,13 @@ namespace Chroma.SabreVGA
 
         private static readonly Log _log = LogManager.GetForCurrentAssembly();
 
-        private VgaCell[] _buffer;
+        private VgaCell[] _buffer = null!;
         private Size _size;
         private int _blinkTimer;
         private bool _blinkingCellsVisible = true;
 
-        private RenderTarget BackgroundRenderTarget { get; set; }
-        private RenderTarget ForegroundRenderTarget { get; set; }
+        private RenderTarget? BackgroundRenderTarget { get; set; }
+        private RenderTarget? ForegroundRenderTarget { get; set; }
 
         public int CellBlinkInterval { get; set; } = 500;
 
@@ -169,10 +169,10 @@ namespace Chroma.SabreVGA
 
         protected override void FreeManagedResources()
         {
-            BackgroundRenderTarget.Dispose();
+            BackgroundRenderTarget?.Dispose();
             BackgroundRenderTarget = null;
 
-            ForegroundRenderTarget.Dispose();
+            ForegroundRenderTarget?.Dispose();
             ForegroundRenderTarget = null;
         }
 

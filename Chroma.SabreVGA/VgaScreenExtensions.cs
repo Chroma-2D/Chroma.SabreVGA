@@ -9,7 +9,7 @@ namespace Chroma.SabreVGA
         {
             screen[x, y].Character = character;
         }
-        
+
         public static void PutCharAt(this VgaScreen screen,
             int x, int y, char character, bool blink)
         {
@@ -17,26 +17,26 @@ namespace Chroma.SabreVGA
             screen[x, y].Blink = blink;
         }
 
-        public static void PutCharAt(this VgaScreen screen,
+        public static void PutCharAt(this VgaScreen screen, 
             int x, int y, char character, Color foreground, Color background, bool blink)
         {
             screen.SetColorAt(x, y, foreground, background);
             screen.PutCharAt(x, y, character, blink);
         }
-        
-        public static void SetColorAt(this VgaScreen screen,
+
+        public static void SetColorAt(this VgaScreen screen, 
             int x, int y, Color foreground, Color background)
         {
             screen[x, y].Foreground = foreground;
             screen[x, y].Background = background;
         }
 
-        public static void ClearToColor(this VgaScreen screen,
+        public static void ClearToColor(this VgaScreen screen, 
             Color foreground, Color background)
         {
             screen.ActiveForegroundColor = foreground;
             screen.ActiveBackgroundColor = background;
-            
+
             for (var y = 0; y < screen.TotalRows; y++)
             {
                 for (var x = 0; x < screen.TotalColumns; x++)
