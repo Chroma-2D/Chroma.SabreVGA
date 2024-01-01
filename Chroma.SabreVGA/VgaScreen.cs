@@ -108,27 +108,29 @@ namespace Chroma.SabreVGA
         {
             if (BackgroundRenderTarget != null)
             {
-                context.RenderTo(BackgroundRenderTarget, () =>
-                {
-                    context.Clear(Color.Transparent);
-                    DrawBackgroundBuffer(context);
-                });
-
+                context.RenderTo(BackgroundRenderTarget, FlushBackgroundBuffer);
                 context.DrawTexture(BackgroundRenderTarget, Position, Vector2.One, Vector2.Zero, 0f);
             }
 
             if (ForegroundRenderTarget != null)
             {
-                context.RenderTo(ForegroundRenderTarget, () =>
-                {
-                    context.Clear(Color.Transparent);
-                    DrawForegroundBuffer(context);
-                });
-
+                context.RenderTo(ForegroundRenderTarget, FlushForegroundBuffer);
                 context.DrawTexture(ForegroundRenderTarget, Position, Vector2.One, Vector2.Zero, 0f);
             }
-            
+
             Cursor.Draw(context);
+        }
+
+        private void FlushBackgroundBuffer(RenderContext context, RenderTarget _)
+        {
+            context.Clear(Color.Transparent);
+            DrawBackgroundBuffer(context);
+        }
+
+        private void FlushForegroundBuffer(RenderContext context, RenderTarget _)
+        {
+            context.Clear(Color.Transparent);
+            DrawForegroundBuffer(context);
         }
 
         public void SetCellSizes(int cellWidth, int cellHeight)
@@ -187,7 +189,7 @@ namespace Chroma.SabreVGA
         private void DrawBackgroundBuffer(RenderContext context)
         {
             RenderSettings.ShapeBlendingEnabled = false;
-            
+
             for (var y = 0; y < TotalRows; y++)
             {
                 for (var x = 0; x < TotalColumns; x++)
