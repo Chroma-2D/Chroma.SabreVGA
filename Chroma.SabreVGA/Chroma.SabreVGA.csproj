@@ -7,7 +7,7 @@
 
     <PropertyGroup>
         <PackageId>Chroma.SabreVGA</PackageId>
-        <Version>13.0.1</Version>
+        <Version>14.0.0</Version>
         <Authors>vddCore</Authors>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Description>VGA emulator for Chroma Framework to aid in creation of text-based games.</Description>
